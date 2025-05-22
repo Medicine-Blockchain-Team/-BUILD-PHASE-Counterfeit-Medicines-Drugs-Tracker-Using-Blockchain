@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Medicine Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    form {
+      margin-bottom: 1rem;
+    }
+    .message {
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      background-color: #f0f0f0;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Add Drug</h1>
+
+  <% if (message) { %>
+    <div class="message <%= message.includes('successfully') ? 'success' : 'error' %>">
+      <%= message %>
+    </div>
+  <% } %>
+
+  <form method="POST" action="/add-drug">
+    <input type="text" name="id" placeholder="Drug ID" required />
+    <input type="text" name="name" placeholder="Drug Name" required />
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
