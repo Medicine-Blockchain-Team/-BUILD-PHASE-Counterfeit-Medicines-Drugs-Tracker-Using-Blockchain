@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "682f1fcc3b99037414978fd8"
+  },
+  "id": 101,
+  "name": "Paracetamol",
+  "history": [
+    "Drug added to blockchain"
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682f24974efb274f728891f7"
+  },
+  "id": 102,
+  "name": "Ibuprofen",
+  "history": [
+    "Drug added to blockchain"
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682f24c44efb274f728891f9"
+  },
+  "id": 103,
+  "name": "Amoxicillin",
+  "history": [
+    "Drug added to blockchain"
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682f24e34efb274f728891fb"
+  },
+  "id": 104,
+  "name": "Metformin",
+  "history": [
+    "Drug added to blockchain"
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "682f24f34efb274f728891fd"
+  },
+  "id": 105,
+  "name": "Omeprazole",
+  "history": [
+    "Drug added to blockchain"
+  ],
+  "__v": 0
+}]
