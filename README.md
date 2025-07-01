@@ -87,3 +87,25 @@ function addDrug(uint256 _id, string memory _name) public {
     emit DrugAdded(_id, _name);
 }
 
+
+---
+
+## 📌 TalentForm.ai Checkpoints
+
+**IMPORTANT FOR REVIEWERS:**
+
+✅ **Checkpoint 1 submission:**  
+Please review the `checkpoint1` branch for the exact code as originally submitted for Checkpoint 1.  
+
+✅ **Checkpoint 2 development:**  
+The `main` branch contains the ongoing code changes for Checkpoint 2 and beyond.  
+
+---
+
+👉 How to switch branches on GitHub:  
+- Click the **branch selector** dropdown at the top-left of the repo.  
+- Choose **checkpoint1** to see the submission for Checkpoint 1.  
+- Choose **main** to see current work.
+
+Thank you for reviewing!
+
