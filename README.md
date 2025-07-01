@@ -88,7 +88,7 @@ function addDrug(uint256 _id, string memory _name) public {
 }
 
 **IMPORTANT FOR REVIEWERS:**
-✅ **Checkpoint 2 submission (current):**  
+✅ **Checkpoint 2 submission:**  
   - See branch: `checkpoint2`
   - Includes updated UI, improved routes, enhanced backend validations, better smart contract interaction, and more detailed supply chain role preparation
 
