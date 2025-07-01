@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verify Drug</title>
+   <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h2>Welcome, <%= user.name %> (<%= user.role %>)</h2>
+
+
+  <h3>Verify Drug Authenticity</h3>
+  
+  <% if (message) { %>
+    <p><%= message %></p>
+  <% } %>
+
+  <form action="/verify-drug" method="POST">
+    <label for="drugId">Enter Drug ID:</label>
+    <input type="text" name="drugId" required />
+    <button type="submit">Verify</button>
+  </form>
+</body>
+</html>

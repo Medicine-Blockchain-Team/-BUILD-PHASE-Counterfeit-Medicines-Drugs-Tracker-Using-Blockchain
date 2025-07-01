@@ -1,0 +1,25 @@
+<!-- views/admin-flagged.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Flagged Batches</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: true }) %>
+  <div class="container mt-4">
+    <h2>Flagged/Counterfeit Drug Batches</h2>
+    <% if (flaggedBatches.length === 0) { %>
+      <p>No flagged batches found.</p>
+    <% } else { %>
+      <ul class="list-group">
+        <% flaggedBatches.forEach(batch => { %>
+          <li class="list-group-item">
+            Batch ID: <%= batch.batchId %> - Reason: <%= batch.reason %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</body>
+</html>

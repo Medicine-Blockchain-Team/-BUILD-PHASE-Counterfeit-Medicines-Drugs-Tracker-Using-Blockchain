@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Manage Users</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      color: #005a9e;
+      text-align: center;
+    }
+
+    p {
+      text-align: right;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    thead {
+      background-color: #e8f1fa;
+    }
+
+    th {
+      color: #005a9e;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f0f8ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard - Users</h1>
+  <p>Welcome, <%= user.name %></p>
+
+  <!-- Add logic to display user list -->
+  <table border="1">
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (users && users.length > 0) { %>
+        <% users.forEach(function(u) { %>
+          <tr>
+            <td><%= u._id %></td>
+            <td><%= u.email %></td>
+            <td><%= u.role %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="3">No users found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>

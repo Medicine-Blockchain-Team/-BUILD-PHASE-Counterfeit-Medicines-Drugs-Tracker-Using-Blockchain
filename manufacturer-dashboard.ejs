@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Manufacturer Dashboard</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: false }) %>
+
+  <div class="container mt-4">
+    <h2>Manufacturer Dashboard</h2>
+
+    <% if (message) { %>
+      <div class="alert alert-info"><%= message %></div>
+    <% } %>
+
+    <!-- ✅ FIXED: Updated the action URL to match backend route -->
+    <form method="POST" action="/manufacturer/add-drug" class="mt-4">
+      <div class="form-group">
+        <label for="id">Drug ID:</label>
+        <input type="text" class="form-control" name="id" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Drug Name:</label>
+        <input type="text" class="form-control" name="name" required>
+      </div>
+      <button type="submit" class="btn btn-primary mt-2">Add Drug</button>
+    </form>
+
+    <hr>
+    <h4>Your Drugs</h4>
+    <ul>
+      <% if (drugs && drugs.length > 0) { %>
+        <% drugs.forEach(drug => { %>
+          <li><%= drug.id %> - <%= drug.name %> - <%= drug.status %></li>
+        <% }) %>
+      <% } else { %>
+        <li>No drugs found.</li>
+      <% } %>
+    </ul>
+  </div>
+</body>
+</html>
