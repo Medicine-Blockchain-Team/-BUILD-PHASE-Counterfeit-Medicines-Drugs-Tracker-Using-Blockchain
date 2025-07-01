@@ -87,3 +87,13 @@ function addDrug(uint256 _id, string memory _name) public {
     emit DrugAdded(_id, _name);
 }
 
+**IMPORTANT FOR REVIEWERS:**
+✅ **Checkpoint 2 submission (current):**  
+  - See branch: `checkpoint2`
+  - Includes updated UI, improved routes, enhanced backend validations, better smart contract interaction, and more detailed supply chain role preparation
+
+👉 **How to switch branches on GitHub:**  
+- Click the **branch selector** dropdown at the top-left of the repo page.  
+- Select the appropriate branch (e.g., `checkpoint2`) to view that submission.
+
+
