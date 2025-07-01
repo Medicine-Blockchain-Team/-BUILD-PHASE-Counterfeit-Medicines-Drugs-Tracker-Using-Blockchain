@@ -70,6 +70,6 @@ cd backend
 node server.js
 
 5️⃣ Visit the app at:
-http://localhost:3000
+http://localhost:5000
 
 
