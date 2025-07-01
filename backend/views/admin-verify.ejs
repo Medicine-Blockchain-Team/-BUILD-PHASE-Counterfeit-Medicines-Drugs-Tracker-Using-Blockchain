@@ -1,0 +1,24 @@
+<!-- views/admin-verify.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Verify Drug Batch</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: true }) %>
+  <div class="container mt-4">
+    <h2>Verify Drug Batch ID Authenticity</h2>
+    <form method="POST" action="/admin/verify">
+      <div class="mb-3">
+        <label for="batchId" class="form-label">Batch ID</label>
+        <input type="text" class="form-control" name="batchId" id="batchId" required />
+      </div>
+      <button type="submit" class="btn btn-primary">Verify</button>
+    </form>
+    <% if (result) { %>
+      <div class="alert alert-info mt-3"><%= result %></div>
+    <% } %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Drug</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <h1>Add New Drug</h1>
+
+  <% if (typeof error !== 'undefined') { %>
+    <p style="color:red"><%= error %></p>
+  <% } %>
+
+  <form action="/manufacturer/add-drug" method="POST">
+    <label>Drug ID:</label><br />
+    <input type="text" name="id" required /><br />
+    <label>Drug Name:</label><br />
+    <input type="text" name="name" required /><br />
+    <button type="submit">Add Drug</button>
+  </form>
+
+  <a href="/dashboard">Back to Dashboard</a>
+</body>
+</html>

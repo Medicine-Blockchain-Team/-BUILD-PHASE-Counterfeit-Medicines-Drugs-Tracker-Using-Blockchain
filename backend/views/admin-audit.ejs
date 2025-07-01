@@ -1,0 +1,52 @@
+<!-- views/admin-audit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Audit Logs</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: true }) %>
+
+  <div class="container mt-4">
+    <h2>Blockchain-based Audit Logs</h2>
+
+    <% if (auditLogs && auditLogs.length > 0) { %>
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Details</th>
+            <th>Tx Hash / Reference</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% auditLogs.forEach(log => { %>
+            <tr>
+              <td><%= new Date(log.timestamp).toLocaleString() %></td>
+              <td><%= log.userName %></td>
+              <td><%= log.action %></td>
+              <td><%= log.details || 'N/A' %></td>
+              <td>
+                <% if (log.txHash) { %>
+                  <a href="https://etherscan.io/tx/<%= log.txHash %>" target="_blank" rel="noopener noreferrer">
+                    <%= log.txHash.substring(0, 10) %>...
+                  </a>
+                <% } else { %>
+                  N/A
+                <% } %>
+              </td>
+              <td><%= log.status %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No audit logs found.</p>
+    <% } %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drug Verification Result</title>
+   <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h2>Welcome, <%= user.name %> (<%= user.role %>)</h2>
+
+
+  <h3>Verification Result</h3>
+
+  <% if (drug) { %>
+    <p>✅ Drug Found</p>
+    <p><strong>ID:</strong> <%= drug.id %></p>
+    <p><strong>Name:</strong> <%= drug.name %></p>
+    <p><strong>Status:</strong> <%= drug.status %></p>
+    <p><strong>Manufacturer:</strong> <%= drug.manufacturer %></p>
+  <% } else { %>
+    <p>❌ Drug not found.</p>
+  <% } %>
+
+  <a href="/verify-drug">Verify Another</a>
+</body>
+</html>

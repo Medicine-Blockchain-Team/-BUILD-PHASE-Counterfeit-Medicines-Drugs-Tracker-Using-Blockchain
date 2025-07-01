@@ -1,0 +1,19 @@
+<!-- views/admin-reports.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Reports</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: true }) %>
+  <div class="container mt-4">
+    <h2>Analytics & Reports</h2>
+    <ul>
+      <li>Total Drugs: <%= stats.totalDrugs %></li>
+      <li>Total Transfers: <%= stats.totalTransfers %></li>
+      <li>Flagged Batches: <%= stats.flaggedBatches %></li>
+    </ul>
+  </div>
+</body>
+</html>
