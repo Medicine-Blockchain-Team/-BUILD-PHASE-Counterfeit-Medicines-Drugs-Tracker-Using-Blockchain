@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const users = await User.find();
-    res.render('admin/users', { user: req.session.user, users });
+    res.render('admin-users', { user: req.session.user, users });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
@@ -31,7 +31,7 @@ router.get('/users', async (req, res) => {
 router.get('/drugs', async (req, res) => {
   try {
     const drugs = await Drug.find();
-    res.render('admin/drugs', { user: req.session.user, drugs });
+    res.render('admin-drugs', { user: req.session.user, drugs });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
