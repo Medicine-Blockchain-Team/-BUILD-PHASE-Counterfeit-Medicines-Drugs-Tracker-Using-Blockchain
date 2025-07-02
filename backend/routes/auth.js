@@ -2,6 +2,8 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
 const User = require("../models/User");
+const { web3 } = require('../config/web3'); // Import web3 to get accounts
+
 
 // Register route
 router.post("/register", async (req, res) => {
@@ -48,19 +50,25 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Compare password with passwordHash
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Store session info
+    // --- CHANGE: Add walletAddress to the session ---
+    // For this development setup, we'll assign the first Hardhat account
+    // to any user who logs in.
+    const accounts = await web3.eth.getAccounts();
+    const walletAddress = accounts[0]; // The default manufacturer/sender address
+
     req.session.user = {
       id: user._id,
       name: user.username,
       email: user.email,
       role: user.role,
+      walletAddress: walletAddress // Store the address in the session
     };
+    // --- END CHANGE ---
 
     return res.json({ message: "Login successful", user: req.session.user });
   } catch (err) {
@@ -68,7 +76,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 // Optional admin check middleware (recommended)
 function isAdmin(req, res, next) {
   if (req.session.user && req.session.user.role === "admin") {

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drug Verification Result</title>
+   <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h2>Welcome, <%= user.name %> (<%= user.role %>)</h2>
+
+  <h3>Verification Result</h3>
+
+  <% if (message) { %>
+    <p class="message"><%= message %></p>
+  <% } %>
+
+  <% if (drug) { %>
+    <div class="drug-info">
+      <p><strong>ID:</strong> <%= drug.id %></p>
+      <p><strong>Name:</strong> <%= drug.name %></p>
+      <p><strong>Status:</strong> <%= drug.status %></p>
+      <p><strong>Manufacturer:</strong> <%= drug.manufacturer %></p>
+      <p><strong>Authenticity:</strong>
+        <% if (drug.isFlagged) { %>
+          <span style="color: red; font-weight: bold;">FLAGGED / POTENTIALLY COUNTERFEIT ❌</span>
+        <% } else { %>
+          <span style="color: green; font-weight: bold;">AUTHENTIC ✅</span>
+        <% } %>
+      </p>
+    </div>
+  <% } else { %>
+    <p class="message">❌ Drug not found.</p>
+  <% } %>
+
+  <a href="/verify-drug">Verify Another</a>
+</body>
+</html>

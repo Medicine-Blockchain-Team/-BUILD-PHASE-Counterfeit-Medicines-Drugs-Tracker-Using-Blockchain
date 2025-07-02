@@ -1,3 +1,5 @@
+// backend/routes/manufacturer.js
+
 const express = require('express');
 const router = express.Router();
 const { ensureLoggedIn, requireRole } = require('../middleware/auth');
@@ -5,8 +7,7 @@ const Drug = require('../models/Drug');
 const { web3, contract } = require('../config/web3');
 const AuditLog = require('../models/AuditLog');
 
-
-// Manufacturer dashboard (GET /manufacturer/dashboard)
+// GET /dashboard route
 router.get(
   '/dashboard',
   ensureLoggedIn,
@@ -15,11 +16,21 @@ router.get(
     try {
       const user = req.session.user;
 
-      if (!user || !user.name) {
+      if (!user || !user.walletAddress) {
         return res.status(400).send("⚠️ Invalid session. Please log in again.");
       }
 
-      const drugs = await Drug.find({ manufacturer: user.name });
+      // --- THE FIX: Perform a case-insensitive query ---
+      // We create a regular expression from the user's wallet address.
+      // The 'i' flag makes the search case-insensitive.
+      const manufacturerAddressRegex = new RegExp(`^${user.walletAddress}$`, 'i');
+      
+      // Now, we use this regex to find the drugs.
+      const drugs = await Drug.find({ manufacturer: manufacturerAddressRegex });
+      // --- END OF FIX ---
+
+      console.log(`Querying for manufacturer address: ${user.walletAddress}`);
+      console.log(`Found ${drugs.length} drugs.`);
 
       res.render('manufacturer-dashboard', {
         user,
@@ -27,16 +38,13 @@ router.get(
         message: null
       });
     } catch (err) {
-      console.error("Dashboard error:", {
-        message: err.message,
-        stack: err.stack
-      });
+      console.error("Dashboard error:", err);
       res.status(500).send("Server error");
     }
   }
 );
 
-// POST /manufacturer/add-drug
+// POST /add-drug route (This should be correct from our previous fixes)
 router.post(
   '/add-drug',
   ensureLoggedIn,
@@ -44,107 +52,52 @@ router.post(
   async (req, res) => {
     const { id, name } = req.body;
     const user = req.session.user;
-
-    if (!user || !user.name) {
-      return res.status(400).send("⚠️ Invalid user session. Please log in again.");
-    }
-
     const manufacturerName = user.name;
 
     try {
-      // Basic input validation
       if (!id || !name) {
-        const drugs = await Drug.find({ manufacturer: manufacturerName });
-        return res.render('manufacturer-dashboard', {
-          user,
-          drugs,
-          message: '⚠️ Please provide both Drug ID and Name.'
-        });
+        const drugs = await Drug.find({ manufacturer: new RegExp(`^${user.walletAddress}$`, 'i') });
+        return res.render('manufacturer-dashboard', { user, drugs, message: '⚠️ Please provide both Drug ID and Name.' });
       }
 
-      // Check if drug ID already exists in DB
       const existingDrug = await Drug.findOne({ id });
       if (existingDrug) {
-        const drugs = await Drug.find({ manufacturer: manufacturerName });
-        return res.render('manufacturer-dashboard', {
-          user,
-          drugs,
-          message: "⚠️ Drug ID already exists."
-        });
+        const drugs = await Drug.find({ manufacturer: new RegExp(`^${user.walletAddress}$`, 'i') });
+        return res.render('manufacturer-dashboard', { user, drugs, message: "⚠️ Drug ID already exists in the database." });
       }
 
-      // Get sender address
       const sender = user.walletAddress || (await web3.eth.getAccounts())[0];
+      if (!sender) throw new Error("Sender wallet address not found.");
 
-      if (!sender) {
-        throw new Error("Sender wallet address not found.");
-      }
+      console.log(`Sending 'addDrug' transaction to blockchain with ID: ${id}, Name: ${name}`);
+      const tx = await contract.methods.addDrug(id, name).send({ from: sender, gas: 3000000 });
 
-      // Interact with blockchain
-      console.log("Calling contract.addDrug() with:", id, name);
-      await contract.methods.addDrug(id, name).send({
-        from: sender,
-        gas: 3000000
-      });
-
-      // Save drug to DB
-      const newDrug = new Drug({
-        id,
-        name,
-        manufacturer: manufacturerName,
-        currentOwner: manufacturerName,
-        status: "Manufactured",
-        history: [{
-          status: "Manufactured",
-          updatedBy: user.role,
-          owner: manufacturerName,
-          timestamp: Date.now()
-        }]
-      });
-
-      await newDrug.save();
-      // ✅ Define auditEntry first, then save it
-      const auditEntry = new AuditLog({
+      await new AuditLog({
         userName: manufacturerName,
-        action: 'Added Drug',
+        action: 'Submitted Add Drug Transaction',
         details: `Drug ID: ${id}, Name: ${name}`,
-        txHash: 'N/A (web3.send() does not return hash here)',
+        txHash: tx.transactionHash,
         status: 'Success'
-      });
-      await auditEntry.save();
-      
+      }).save();
 
-
-      const drugs = await Drug.find({ manufacturer: manufacturerName });
+      const drugs = await Drug.find({ manufacturer: new RegExp(`^${user.walletAddress}$`, 'i') });
       res.render('manufacturer-dashboard', {
         user,
         drugs,
-        message: "✅ Drug added successfully!"
+        message: `✅ Transaction submitted successfully! The new drug will appear shortly. TxHash: ${tx.transactionHash.substring(0, 10)}...`
       });
 
     } catch (err) {
-      console.error("🚨 Add drug error:", {
-        message: err.message,
-        stack: err.stack
-      });
-
+      console.error("🚨 Add drug transaction error:", { message: err.message });
       let errorMessage = "⚠️ Server error. Please try again.";
-      if (err.message.includes('revert')) {
-        errorMessage = "⚠️ Blockchain rejected the transaction.";
-      } else if (err.message.includes('invalid address')) {
-        errorMessage = "⚠️ Invalid wallet address.";
-      } else if (err.message.includes('Sender wallet address not found')) {
-        errorMessage = "⚠️ Wallet not connected. Please log in again.";
-      } else if (err.message.includes('Drug validation failed')) {
-        errorMessage = "⚠️ Drug creation failed due to missing fields.";
+      const errString = err.message.toLowerCase();
+      if (errString.includes('nonce too low') || errString.includes('replacement transaction underpriced')) {
+        errorMessage = "⚠️ Transaction failed (nonce issue). Please wait a moment and try again.";
+      } else if (errString.includes('revert')) {
+        errorMessage = "⚠️ Blockchain rejected the transaction. The drug might already exist on-chain.";
       }
-
-      const drugs = await Drug.find({ manufacturer: manufacturerName });
-      res.render('manufacturer-dashboard', {
-        user,
-        drugs,
-        message: errorMessage
-      });
+      const drugs = await Drug.find({ manufacturer: new RegExp(`^${user.walletAddress}$`, 'i') });
+      res.render('manufacturer-dashboard', { user, drugs, message: errorMessage });
     }
   }
 );

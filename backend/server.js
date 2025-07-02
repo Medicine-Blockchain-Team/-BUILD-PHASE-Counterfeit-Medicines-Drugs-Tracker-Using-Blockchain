@@ -9,6 +9,7 @@ const MongoStore = require("connect-mongo");
 const Drug = require("./models/Drug");
 const User = require("./models/User");
 const { ensureLoggedIn, requireRole } = require("./middleware/auth");
+const { startListening } = require('./services/blockchainListener'); // Import the listener
 
 const app = express();
 
@@ -27,7 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // ========== View Engine ==========
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "../frontend/views"));
 
 // ========== Session Setup ==========
 app.use(
@@ -188,7 +189,8 @@ mongoose
     console.log("✅ MongoDB connected");
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+        console.log(`🚀 Server running at http://localhost:${PORT}`);
+        startListening(); // Call the function to start listening
     });
   })
   .catch((err) => {
