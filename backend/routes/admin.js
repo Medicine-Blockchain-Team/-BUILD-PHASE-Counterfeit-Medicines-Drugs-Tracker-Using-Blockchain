@@ -4,8 +4,9 @@ const { ensureLoggedIn, requireRole } = require('../middleware/auth');
 const User = require('../models/User');
 const Drug = require('../models/Drug');
 const AuditLog = require('../models/AuditLog');
-const { web3, contract } = require('../config/web3'); // Import web3 and contract
+const { web3, contract } = require('../config/web3');
 
+// This middleware ensures all routes in this file are accessed only by logged-in admins.
 router.use(ensureLoggedIn);
 router.use(requireRole('admin'));
 
@@ -13,8 +14,9 @@ router.use(requireRole('admin'));
 router.get('/users', async (req, res) => {
   try {
     const users = await User.find();
-    res.render('admin-users', { users, user: req.session.user }); // Pass user to template
+    res.render('admin-users', { users, user: req.session.user });
   } catch (err) {
+    console.error("Error fetching users:", err);
     res.status(500).send("Server error");
   }
 });
@@ -23,8 +25,9 @@ router.get('/users', async (req, res) => {
 router.get('/drugs', async (req, res) => {
   try {
     const drugs = await Drug.find();
-    res.render('admin-drugs', { drugs, user: req.session.user }); // Pass user to template
+    res.render('admin-drugs', { drugs, user: req.session.user });
   } catch (err) {
+    console.error("Error fetching drugs:", err);
     res.status(500).send("Server error");
   }
 });
@@ -34,10 +37,10 @@ router.get('/verify', (req, res) => {
   res.render('admin-verify', { user: req.session.user, result: null });
 });
 
-// Admin: Verify Drug Authenticity (POST) - Enhanced with blockchain check and flagging
+// Admin: Verify Drug Authenticity (POST) - This is where drugs can be automatically flagged.
 router.post('/verify', async (req, res) => {
   const user = req.session.user;
-  let { batchId } = req.body; // Renamed from drugId to batchId for consistency with form
+  let { batchId } = req.body;
 
   try {
     if (!batchId || batchId.trim() === "") {
@@ -47,71 +50,40 @@ router.post('/verify', async (req, res) => {
     batchId = batchId.trim();
     console.log("Admin verifying Drug ID:", batchId);
 
-    // 1. Fetch drug from MongoDB
     let drug = await Drug.findOne({ id: batchId });
     let result;
 
     if (!drug) {
       result = `❌ Drug ${batchId} not found in MongoDB.`;
-      // No need to flag if not in DB, but log it
-      const auditEntry = new AuditLog({
-        userName: user.name,
-        action: 'Admin Verify Drug (Not Found)',
-        details: `Attempted to verify non-existent Drug ID: ${batchId}`,
-        status: 'Failed'
-      });
-      await auditEntry.save();
+      await new AuditLog({ userName: user.name, action: 'Admin Verify (Not Found)', details: `ID: ${batchId}` }).save();
       return res.render('admin-verify', { user, result });
     }
 
-    // 2. Fetch drug details from the blockchain
     const blockchainDrug = await contract.methods.getDrug(batchId).call();
     const blockchainDrugId = blockchainDrug[0];
 
     if (blockchainDrugId == 0 || blockchainDrugId.toString() !== batchId) {
-      // Drug found in MongoDB but not on blockchain, or ID mismatch
-      drug.isFlagged = true; // Mark as flagged
-      await drug.save(); // Save the updated status to MongoDB
-
+      drug.isFlagged = true;
+      await drug.save();
       result = `⚠️ Drug ${batchId} found in DB but NOT on blockchain. Marked as FLAGGED.`;
-      const auditEntry = new AuditLog({
-        userName: user.name,
-        action: 'Admin Verify Drug (Flagged)',
-        details: `Drug ID: ${batchId} - Not found on blockchain.`,
-        status: 'Flagged'
-      });
-      await auditEntry.save();
+      await new AuditLog({ userName: user.name, action: 'Admin Verify (Flagged)', details: `ID: ${batchId}` }).save();
     } else {
-      // Drug found on blockchain, mark as not flagged (unless admin explicitly flags it later)
-      drug.isFlagged = false; // Unflag if it was previously flagged by patient
-      await drug.save(); // Save the updated status to MongoDB
-
+      drug.isFlagged = false;
+      await drug.save();
       result = `✅ Drug ${batchId} verified as authentic on blockchain. Unflagged if previously flagged.`;
-      const auditEntry = new AuditLog({
-        userName: user.name,
-        action: 'Admin Verify Drug (Authentic)',
-        details: `Drug ID: ${batchId} - Verified on blockchain.`,
-        status: 'Success'
-      });
-      await auditEntry.save();
+      await new AuditLog({ userName: user.name, action: 'Admin Verify (Authentic)', details: `ID: ${batchId}` }).save();
     }
 
     res.render('admin-verify', { user, result });
 
   } catch (error) {
     console.error('🚨 Admin Verification Error:', error);
-    const auditEntry = new AuditLog({
-      userName: user.name,
-      action: 'Admin Verify Drug (Error)',
-      details: `Error verifying Drug ID: ${batchId} - ${error.message}`,
-      status: 'Error'
-    });
-    await auditEntry.save();
+    await new AuditLog({ userName: user.name, action: 'Admin Verify (Error)', details: `ID: ${batchId} - ${error.message}` }).save();
     res.status(500).send('Internal Server Error during verification.');
   }
 });
 
-// Admin: Manually Flag a Drug (New Route)
+// Admin: Manually Flag a Drug (Example of a route for future use)
 router.post('/flag-drug', async (req, res) => {
   const user = req.session.user;
   const { drugIdToFlag, reason } = req.body;
@@ -120,45 +92,41 @@ router.post('/flag-drug', async (req, res) => {
     if (!drugIdToFlag || drugIdToFlag.trim() === "") {
       return res.status(400).json({ message: "Drug ID to flag is required." });
     }
-
     const drug = await Drug.findOne({ id: drugIdToFlag.trim() });
     if (!drug) {
       return res.status(404).json({ message: "Drug not found in database." });
     }
-
     drug.isFlagged = true;
-    // Optionally, you could add the reason to the drug's history or a separate field
-    // drug.history.push({ status: "Flagged by Admin", updatedBy: user.name, owner: user.name, timestamp: Date.now(), details: reason });
     await drug.save();
-
-    const auditEntry = new AuditLog({
-      userName: user.name,
-      action: 'Admin Manually Flagged Drug',
-      details: `Drug ID: ${drugIdToFlag}, Reason: ${reason || 'No reason provided'}`,
-      status: 'Flagged'
-    });
-    await auditEntry.save();
-
+    await new AuditLog({ userName: user.name, action: 'Admin Manually Flagged Drug', details: `ID: ${drugIdToFlag}, Reason: ${reason || 'N/A'}` }).save();
     res.json({ message: `Drug ${drugIdToFlag} has been manually flagged.` });
-
   } catch (error) {
     console.error('🚨 Admin Flag Drug Error:', error);
     res.status(500).json({ message: 'Internal Server Error during flagging.' });
   }
 });
 
-
+// =================================================================
+// **THE CORRECTED AND UPDATED ROUTE**
+// =================================================================
 // View all flagged drugs page
 router.get('/flagged', async (req, res) => {
   try {
-    const flaggedBatches = await Drug.find({ isFlagged: true }); // Fetch only flagged drugs
-    res.render('admin-flagged', { user: req.session.user, flaggedBatches });
+    // Query the Drug collection for all documents where isFlagged is true.
+    const flaggedDrugs = await Drug.find({ isFlagged: true });
+
+    // Render the admin-flagged view, passing the list of flagged drugs to it.
+    res.render('admin-flagged', {
+      user: req.session.user,
+      flaggedDrugs: flaggedDrugs // Pass the fetched data to the template
+    });
   } catch (err) {
-    console.error('Error fetching flagged batches:', err);
-    res.status(500).send("Server error");
+    console.error('Error fetching flagged drugs:', err);
+    res.status(500).send("Server error while fetching flagged drugs.");
   }
 });
 
+// View audit logs page
 router.get('/audit', async (req, res) => {
   try {
     const auditLogs = await AuditLog.find().sort({ timestamp: -1 }).lean();
@@ -169,18 +137,14 @@ router.get('/audit', async (req, res) => {
   }
 });
 
+// View reports page
 router.get('/reports', async (req, res) => {
   try {
     const totalDrugs = await Drug.countDocuments({});
-    const totalTransfers = await AuditLog.countDocuments({ action: 'transfer' }); // adjust 'transfer' if needed
+    const totalTransfers = await AuditLog.countDocuments({ action: 'transfer' });
     const flaggedBatches = await Drug.countDocuments({ isFlagged: true });
 
-    const stats = {
-      totalDrugs,
-      totalTransfers,
-      flaggedBatches
-    };
-
+    const stats = { totalDrugs, totalTransfers, flaggedBatches };
     res.render('admin-reports', { user: req.session.user, stats });
   } catch (err) {
     console.error('Error generating report stats:', err);
