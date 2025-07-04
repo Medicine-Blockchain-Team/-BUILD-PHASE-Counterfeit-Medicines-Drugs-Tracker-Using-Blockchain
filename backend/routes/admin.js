@@ -106,16 +106,10 @@ router.post('/flag-drug', async (req, res) => {
   }
 });
 
-// =================================================================
-// **THE CORRECTED AND UPDATED ROUTE**
-// =================================================================
 // View all flagged drugs page
 router.get('/flagged', async (req, res) => {
   try {
-    // Query the Drug collection for all documents where isFlagged is true.
-    const flaggedDrugs = await Drug.find({ isFlagged: true });
-
-    // Render the admin-flagged view, passing the list of flagged drugs to it.
+    const flaggedDrugs = await Drug.find({ isFlagged: true }); // Renamed from flaggedBatches for clarity
     res.render('admin-flagged', {
       user: req.session.user,
       flaggedDrugs: flaggedDrugs // Pass the fetched data to the template
@@ -125,6 +119,48 @@ router.get('/flagged', async (req, res) => {
     res.status(500).send("Server error while fetching flagged drugs.");
   }
 });
+
+// =================================================================
+// **NEW ROUTE TO HANDLE THE UNFLAG ACTION**
+// =================================================================
+router.post('/unflag-drug', async (req, res) => {
+  try {
+    const { drug_id } = req.body; // Get the MongoDB _id from the form's hidden input
+
+    if (!drug_id) {
+      return res.status(400).send("Drug ID not provided.");
+    }
+
+    // Find the drug by its unique MongoDB _id and update it.
+    // Setting 'isFlagged' to false effectively unflags it.
+    const updatedDrug = await Drug.findByIdAndUpdate(
+      drug_id,
+      { $set: { isFlagged: false } },
+      { new: true } // This option returns the document after the update
+    );
+
+    if (!updatedDrug) {
+      return res.status(404).send("Drug not found.");
+    }
+
+    // Log this administrative action
+    await new AuditLog({
+      userName: req.session.user.name,
+      action: 'Admin Unflagged Drug',
+      details: `Drug ID: ${updatedDrug.id} was unflagged.`,
+      status: 'Success'
+    }).save();
+
+    // Redirect the admin back to the flagged drugs page.
+    // The drug that was just unflagged will no longer appear in the list.
+    res.redirect('/admin/flagged');
+
+  } catch (err) {
+    console.error("Error unflagging drug:", err);
+    res.status(500).send("Server error while unflagging drug.");
+  }
+});
+
 
 // View audit logs page
 router.get('/audit', async (req, res) => {
