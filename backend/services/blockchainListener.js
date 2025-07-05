@@ -1,7 +1,6 @@
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.WebsocketProvider("ws://127.0.0.1:8545"));
+// backend/services/blockchainListener.js
 
-const { contract } = require('../config/web3');
+const { web3, contract } = require('../config/web3');
 const Drug = require('../models/Drug');
 const AuditLog = require('../models/AuditLog');
 
@@ -37,38 +36,41 @@ async function startListening() {
             console.log(`\n✨ DrugAdded Event Detected`);
             console.log(`   ID: ${id}, Name: ${name}, Manufacturer: ${manufacturer}`);
 
+            // Use updateOne with upsert: true to create or update the document.
+            // This is the single point of writing to the DB for new drugs.
             await Drug.updateOne(
-                { id },
+                { id: id }, // Find document by this unique ID
                 {
-                    $set: {
-                        name,
-                        manufacturer,
+                    $set: { // Set these fields whether creating or updating
+                        name: name,
+                        manufacturer: manufacturer,
                         currentOwner: manufacturer,
                         status: "Manufactured (On-Chain)",
                         isVerified: true,
                         isFlagged: false,
                     },
-                    $push: {
-                        history: {
+                    $setOnInsert: { // Only add this history on initial creation
+                        history: [{
                             status: "Manufactured (On-Chain)",
                             updatedBy: "Blockchain Listener",
                             owner: manufacturer,
                             timestamp: Date.now()
-                        }
+                        }]
                     }
                 },
-                { upsert: true }
+                { upsert: true } // This is the key: if no doc found, create it.
             );
 
             await new AuditLog({
                 userName: 'Blockchain Listener',
                 action: 'Drug Synced From Blockchain',
                 details: `ID: ${id}, Name: ${name}, Manufacturer: ${manufacturer}`,
-                txHash,
+                txHash: txHash,
                 status: 'Upserted'
             }).save();
 
             console.log(`✅ Drug synced to DB: ${id}`);
+
         } catch (err) {
             console.error(`🚨 Error processing DrugAdded log:`, err);
             await new AuditLog({
@@ -84,7 +86,7 @@ async function startListening() {
         console.error("🚨 Error in DrugAdded subscription:", error);
     });
 
-    // Listen for HistoryUpdated events
+    // ... (HistoryUpdated listener remains the same)
     web3.eth.subscribe('logs', {
         address: contract.options.address,
         topics: [HISTORY_UPDATED_TOPIC]
@@ -149,7 +151,8 @@ async function startListening() {
         console.error("🚨 Error in HistoryUpdated subscription:", error);
     });
 
-    console.log("✅ Blockchain event listeners started.");
+
+    console.log("✅ Blockchain event listeners started successfully.");
 }
 
 module.exports = { startListening };
