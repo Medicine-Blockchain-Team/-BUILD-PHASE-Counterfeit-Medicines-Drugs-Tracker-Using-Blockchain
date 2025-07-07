@@ -1,0 +1,15 @@
+<h2><%= user.role.charAt(0).toUpperCase() + user.role.slice(1).replace('_', ' ') %> Dashboard</h2>
+
+<h3>Update Drug Status</h3>
+<form action="/api/drugs/update-status" method="POST">
+  <label for="id">Drug ID:</label>
+  <input type="text" name="id" required />
+
+  <label for="status">New Status:</label>
+  <input type="text" name="status" required />
+
+  <button type="submit">Update Status</button>
+</form>
+
+<h3>Drugs you currently handle</h3>
+<p>List of drugs will appear here...</p>

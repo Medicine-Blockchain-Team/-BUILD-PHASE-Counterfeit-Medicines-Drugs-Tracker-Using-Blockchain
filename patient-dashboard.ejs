@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <nav>
+    <h1>Welcome, <%= user.name %> </h1>
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <main>
+    <% if (drug) { %>
+  <section class="verification-result">
+    <h2>Verification Result</h2>
+    <div class="drug-info">
+      <h3>✅ Drug Found</h3>
+      <p><strong>ID:</strong> <%= drug.id %></p>
+      <p><strong>Name:</strong> <%= drug.name %></p>
+      <p><strong>Status:</strong> <%= drug.status %></p>
+      <p><strong>Manufacturer:</strong> <%= drug.manufacturer %></p>
+    </div>
+    <a href="/verify-drug" class="verify-another-btn">Verify Another</a>
+  </section>
+<% } %>
+    <section class="verification">
+      <h2>Verify Drug Authenticity</h2>
+      <form action="/verify-drug" method="POST">
+        <label for="drugId">Enter Drug ID:</label>
+        <input type="text" name="drugId" id="drugId" required>
+        <button type="submit">Verify</button>
+      </form>
+
+      <% if (message) { %>
+        <p class="message"><%= message %></p>
+      <% } %>
+
+      <% if (drug) { %>
+        <div class="drug-info">
+          <h3>✅ Drug Details</h3>
+          <p><strong>Name:</strong> <%= drug.name %></p>
+          <p><strong>Status:</strong> <%= drug.status %></p>
+          <p><strong>Manufacturer:</strong> <%= drug.manufacturer %></p>
+        </div>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

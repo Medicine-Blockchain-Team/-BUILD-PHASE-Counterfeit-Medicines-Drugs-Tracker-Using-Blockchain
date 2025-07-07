@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Flagged Batches</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: false }) %>
+
+  <div class="container mt-4">
+    <h2>Flagged / Suspicious Drug Batches</h2>
+    <p>This list shows all drugs that have been flagged as potentially counterfeit or unauthentic during verification. Review each one and unflag if they are confirmed to be authentic.</p>
+
+    <% if (flaggedDrugs && flaggedDrugs.length > 0) { %>
+      <table class="table table-striped table-bordered table-hover mt-4">
+        <thead class="table-dark">
+          <tr>
+            <th>Drug ID</th>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Current Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% flaggedDrugs.forEach(drug => { %>
+            <tr>
+              <td><%= drug.id %></td>
+              <td><%= drug.name %></td>
+              <td>
+                <span title="<%= drug.manufacturer %>">
+                  <%= drug.manufacturer.substring(0, 10) %>...
+                </span>
+              </td>
+              <td><%= drug.status %></td>
+              <td>
+                <!-- THIS IS THE FIX: Add a form for the "Unflag" action -->
+                <form action="/admin/unflag-drug" method="POST" style="display: inline;">
+                  <!-- Hidden input to send the drug's database _id with the request -->
+                  <input type="hidden" name="drug_id" value="<%= drug._id %>">
+                  <button type="submit" class="btn btn-sm btn-success">Unflag</button>
+                </form>
+                <!-- You can add other actions here as well -->
+                <!-- <a href="#" class="btn btn-sm btn-info">View History</a> -->
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <div class="alert alert-success mt-4" role="alert">
+        <strong>No flagged batches found.</strong> All drugs in the system appear to be authentic.
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

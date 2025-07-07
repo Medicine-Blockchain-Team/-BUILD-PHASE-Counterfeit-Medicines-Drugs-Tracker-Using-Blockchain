@@ -1,0 +1,76 @@
+<!-- views/admin-dashboard.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: rgb(254, 254, 254);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 30px;
+      color: #003366;
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    ul li {
+      background-color: #d1a8e9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease-in-out;
+      text-align: center;
+    }
+
+    ul li:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    ul li a {
+      text-decoration: none;
+      font-weight: bold;
+      color: #333;
+      font-size: 18px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: false }) %>
+
+  <div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+    <ul>
+      <li><a href="/admin/users">👥 Manage Users</a></li>
+      <li><a href="/admin/drugs">💊 View All Drug Records</a></li>
+      <li><a href="/admin/verify">🔍 Verify Drug Authenticity</a></li>
+      <li><a href="/admin/flagged">🛑 Flag/Review Suspicious Batches</a></li>
+      <li><a href="/admin/audit">🗃️ View Audit Logs</a></li>
+      <li><a href="/admin/reports">📊 Generate Reports</a></li>
+    </ul>
+  </div>
+</body>
+</html>

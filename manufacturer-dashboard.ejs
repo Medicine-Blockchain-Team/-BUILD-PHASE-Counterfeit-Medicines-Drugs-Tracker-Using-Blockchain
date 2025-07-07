@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <title>Manufacturer Dashboard</title>
+</head>
+<body>
+  <%- include('partials/navbar', { user: user, hideAuthLinks: false }) %>
+
+  <div class="container mt-4">
+    <h2>Manufacturer Dashboard</h2>
+
+    <%# 
+      This block will display any message passed from the backend.
+      This is where the "Transaction submitted successfully!..." message will appear.
+    %>
+    <% if (message) { %>
+      <div class="alert alert-info"><%= message %></div>
+    <% } %>
+
+    <hr>
+
+    <h4>Add New Drug</h4>
+    <%# 
+      This form posts to the /manufacturer/add-drug route.
+      The labels and inputs are now correctly linked using 'for' and 'id'.
+    %>
+    <form method="POST" action="/manufacturer/add-drug" class="mt-3 mb-5">
+      <div class="form-group mb-3">
+        <label for="drugId">Drug ID:</label>
+        <input type="text" class="form-control" name="id" id="drugId" required>
+      </div>
+      <div class="form-group mb-3">
+        <label for="drugName">Drug Name:</label>
+        <input type="text" class="form-control" name="name" id="drugName" required>
+      </div>
+      <button type="submit" class="btn btn-primary mt-2">Add Drug to Blockchain</button>
+    </form>
+
+    <hr>
+
+    <h4>Your Drugs</h4>
+    <%# 
+      This list displays all drugs associated with the manufacturer that are
+      currently present in the MongoDB database. It will update on page refresh.
+    %>
+    <ul class="list-group">
+      <% if (drugs && drugs.length > 0) { %>
+        <% drugs.forEach(drug => { %>
+          <li class="list-group-item">
+            <strong>ID:</strong> <%= drug.id %> | 
+            <strong>Name:</strong> <%= drug.name %> | 
+            <strong>Status:</strong> <%= drug.status %>
+          </li>
+        <% }) %>
+      <% } else { %>
+        <li class="list-group-item">No drugs found. Add one using the form above.</li>
+      <% } %>
+    </ul>
+  </div>
+</body>
+</html>

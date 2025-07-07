@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/dashboard.js" defer></script>
+</head>
+<body>
+  <h1>Welcome, <%= user.role %>!</h1>
+
+  <% if (user.role === 'Manufacturer') { %>
+    <h2>Add Drug</h2>
+    <form id="addDrugForm">
+      <input type="text" name="name" placeholder="Drug Name" required>
+      <input type="text" name="batchNo" placeholder="Batch Number" required>
+      <input type="date" name="mfgDate" required>
+      <input type="date" name="expDate" required>
+      <button type="submit">Add Drug</button>
+    </form>
+  <% } %>
+
+  <% if (user.role === 'CDSCO') { %>
+    <h2>Approve Drug Batch</h2>
+    <form id="approveForm">
+      <input type="text" name="drugId" placeholder="Drug ID" required>
+      <button type="submit">Approve</button>
+    </form>
+  <% } %>
+
+  <% if (user.role === 'Repackager') { %>
+    <h2>Update Drug State</h2>
+    <form id="repackForm">
+      <input type="text" name="drugId" placeholder="Drug ID" required>
+      <button type="submit">Mark as Repackaged</button>
+    </form>
+  <% } %>
+
+  <% if (user.role === 'Distributor') { %>
+    <h2>Deliver Drug</h2>
+    <form id="deliverForm">
+      <input type="text" name="drugId" placeholder="Drug ID" required>
+      <button type="submit">Mark as Delivered</button>
+    </form>
+  <% } %>
+
+  <% if (user.role === 'Patient') { %>
+    <h2>Verify Drug</h2>
+    <form action="/verify" method="GET">
+      <input type="text" name="drugId" placeholder="Drug ID" required>
+      <button type="submit">Check History</button>
+    </form>
+  <% } %>
+</body>
+</html>
