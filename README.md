@@ -24,27 +24,6 @@ Blockchain	Solidity (Smart Contracts), Web3.js
 Database	MongoDB
 Deployment	Vercel, Railway, Polygon Mumbai Testnet
 
-📁 Folder Structure
-pgsql
-Copy
-Edit
-Blockchain-Medicine-Tracker/
-├── backend/
-│   ├── server.js
-│   ├── models/
-│   │   └── Drug.js
-│   ├── config/
-│   │   └── web3.js
-│   └── contracts/
-│       └── Medicine.sol
-├── frontend/
-│   ├── app.js
-│   ├── views/
-│   │   └── index.ejs
-├── .env
-├── package.json
-└── README.md
-
 ⚙️ Installation & Setup
 1. Clone the repository
    https://github.com/Medicine-Blockchain-Team/Blockchain-Medicine-Tracker
